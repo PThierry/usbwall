@@ -4,18 +4,24 @@
 #include "devusb.h"
 #include "devuser.h"
 #include "ldap_config.h"
+#include "socket.h"
 
 int main(void)
 {
   struct ldap_cfg *cfg = make_ldap_cfg(cfg_file_find());
+  int netlink_fd = -1;
+
   if (!cfg)
     return 1; // no configs found
 
   if (init_devusb())
     return 1; // devusb initialization error
 
+  if ((netlink_fd = init_socket()) == -1)
+    return 1; // netlink initialization error
+
   char *username = NULL;
-  while ((username = wait_for_logging()))
+  while ((username = wait_for_logging(netlink_fd)))
   {
     struct devusb **device_list = devices_get();
     char **devids = devids_get(username, cfg);
