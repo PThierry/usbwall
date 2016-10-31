@@ -10,8 +10,10 @@
  ************************************/
 
 /**
- * \brief destroy and free ldap_cfg struct
- * \param cfg ldap_cfg to be destroyed
+ * \brief Find comment within config file
+ * \param line Line from which comment may be found
+ *
+ * \todo This function may not permit '#' to exist in a password or somewhere then in comment
  */
 static void skip_comments(char *line)
 {
