@@ -7,5 +7,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake/Modules/)
 set(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/out)
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/out)
 
+enable_testing()
+
 add_subdirectory(src)
+add_subdirectory(tests)
 add_subdirectory(doc)
