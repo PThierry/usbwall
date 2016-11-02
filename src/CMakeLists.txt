@@ -4,6 +4,117 @@ include(CheckCCompilerFlag)
 ### Check for global CFLAGS compiler support
 ###########################
 
+set(MY_TEST
+"-W"
+"-Waggregate-return"
+"-Wall"
+"-Warray-bounds"
+"-Wbad-function-cast"
+"-Wcast-align"
+"-Wcast-qual"
+"-Wchar-subscripts"
+"-Wcomment"
+"-Wconversion"
+"-Wdeclaration-after-statement"
+"-Wdisabled-optimization"
+"-Wdouble-promotion"
+"-Werror"
+"-Wextra"
+"-Wfloat-equal"
+"-Wformat"
+"-Wformat-nonliteral"
+"-Wformat-security"
+"-Wformat-y2k"
+"-Wignored-qualifiers"
+"-Wimplicit"
+"-Wimplicit-function-declaration"
+"-Wimplicit-int"
+"-Winit-self"
+"-Winline"
+"-Winvalid-pch"
+"-Wjump-misses-init"
+"-Wlogical-op"
+"-Wlong-long"
+"-Wmain"
+"-Wmissing-braces"
+"-Wmissing-declarations"
+"-Wmissing-field-initializers"
+"-Wmissing-format-attribute"
+"-Wmissing-include-dirs"
+"-Wmissing-noreturn"
+"-Wmissing-parameter-type"
+"-Wmissing-prototypes"
+"-Wmultichar"
+"-Wnested-externs"
+"-Wno-endif-labels"
+"-Wno-multichar"
+"-Wnonnull"
+"-Wold-style-declaration"
+"-Wold-style-definition"
+"-Woverlength-strings"
+"-Wpacked"
+"-Wpacked-bitfield-compat"
+"-Wpadded"
+"-Wparentheses"
+"-Wpointer-arith"
+"-Wpointer-sign"
+"-Wredundant-decls"
+"-Wreturn-type"
+"-Wsequence-point"
+"-Wshadow"
+"-Wsign-compare"
+"-Wsign-conversion"
+"-Wstack-protector"
+"-Wstrict-aliasing=3"
+"-Wstrict-overflow=5"
+"-Wstrict-prototypes"
+"-Wsuggest-attribute=const"
+"-Wsuggest-attribute=noreturn"
+"-Wsuggest-attribute=pure"
+"-Wswitch"
+"-Wswitch-default"
+"-Wswitch-enum"
+"-Wsync-nand"
+"-Wtraditional-conversions"
+"-Wtrampolines"
+"-Wtrigraphs"
+"-Wundef"
+"-Wuninitialized"
+"-Wunknown-pragmas"
+"-Wunreachable-code"
+"-Wunsafe-loop-optimizations"
+"-Wunsuffixed-float-constants"
+"-Wunused"
+"-Wunused-function"
+"-Wunused-label"
+"-Wunused-local-typedefs"
+"-Wunused-parameter"
+"-Wunused-value"
+"-Wunused-variable"
+"-Wvariadic-macros"
+"-Wvector-operation-performance"
+"-Wvla"
+"-Wvolatile-register-var"
+"-Wwrite-strings"
+"-ffreestanding"
+"-fno-builtin"
+"-fno-common"
+"-fstack-protector-all"
+"-fstack-protector"
+"-fPIC"
+"-mno-gpopt"
+"-pedantic"
+"-std=c99"
+"-strict-aliasing"
+)
+
+foreach(i ${MY_TEST})
+  check_c_compiler_flag(${i} HAS_${i})
+  if (HAS_${i})
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${i}")
+  endif()
+endforeach()
+
 check_c_compiler_flag(-Weverything HAS_WEVERYTHING_CFLAG)
 if (HAS_WEVERYTHING_CFLAG)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Weverything")
@@ -66,28 +177,34 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_XOPEN_SOURCE=800")
 ###########################
 ### Check for DEBUG mode CFLAGS compiler support
 ###########################
+if (${CMAKE_BUILD_TYPE} MATCHES "DEBUG")
 
-check_c_compiler_flag(-fsanitize=address HAS_SAN_ADDR_CFLAG)
-if (HAS_SAN_ADDR_CFLAG)
+  check_c_compiler_flag(-fsanitize=address HAS_SAN_ADDR_CFLAG)
+  if (HAS_SAN_ADDR_CFLAG)
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address")
-endif()
+  endif()
 
-check_c_compiler_flag(-fsanitize=undefined HAS_SAN_UNDEF_CFLAG)
-if (HAS_SAN_UNDEF_CFLAG)
+  check_c_compiler_flag(-fsanitize=undefined HAS_SAN_UNDEF_CFLAG)
+  if (HAS_SAN_UNDEF_CFLAG)
     set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=undefined")
+  endif()
+
+  ### Define mandatory DEBUG CFLAGS
+
+  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g3")
+
 endif()
-
-### Define mandatory DEBUG CFLAGS
-
-set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g3")
 
 ###########################
 ### Check for RELEASE CFLAGS compiler support
 ###########################
+if (${CMAKE_BUILD_TYPE} MATCHES "RELEASE")
 
-### Define mandatory RELEASE CFLAGS
+  ### Define mandatory RELEASE CFLAGS
 
-set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2")
+  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -O2")
+
+endif()
 
 ###########################
 ### continue to subdirectories
