@@ -1,5 +1,3 @@
-#include "devuser.h"
-
 #include <fcntl.h>
 #include <ldap.h>
 #include <stdlib.h>
@@ -10,12 +8,18 @@
 #include <unistd.h>
 #include <utmp.h>
 
+#include "devuser.h"
+
 #define LOGIN_MAX_LEN 32
 
 static LDAP *setup_ldap(const struct ldap_cfg *cfg);
 static struct berval **extract_devids(LDAP *ldap_ptr,
                                       const char *username,
                                       const struct ldap_cfg *cfg);
+
+/**************************************
+ * Exported functions implementations *
+ **************************************/
 
 char *wait_for_logging(void)
 {
