@@ -1,7 +1,8 @@
 usbwall (0.4-1) unstable; urgency=medium
 
-  * Initial release (Closes: #nnnn).
+  * Initial release (Closes: #860315).
   * Add support for sysvinit and systemd integration for usbwalld
   * Add man page for usbwalld
+  * Complete the installation process. Not yet clean.
 
  -- Philippe Thierry <phil@reseau-libre.net>  Fri, 14 Apr 2017 09:56:19 +0200
