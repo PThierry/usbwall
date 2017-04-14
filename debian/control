@@ -10,7 +10,7 @@ Vcs-Browser: https://github.com/Oline/usbwall
 
 Package: usbwalld
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}, libusb-1.0-0, libpam0g
+Depends: ${shlibs:Depends}, ${misc:Depends}, lsb-base, libusb-1.0-0, libpam0g
 Description: Device filtering daemon, managing locally authorized devices
  This daemon interact with PAM and manage the locally authorized devices
  list. Authorized devices list is then controlled through LDAP registration
