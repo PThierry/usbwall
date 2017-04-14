@@ -26,7 +26,7 @@ Description: LDAP schema file for devid device management schema
  devices such as USB devices only to those allowed for the locally
  connected user.
 
-Package: libpam-devid
+Package: libpam-usbwall
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: <insert up to 60 chars description>
