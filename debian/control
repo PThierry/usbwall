@@ -14,11 +14,17 @@ Depends: ${shlibs:Depends}, ${misc:Depends}, libusb-1.0-0, libpam0g
 Description: <insert up to 60 chars description>
  <insert long description, indented with spaces>
 
-Package: deviddctl
-Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Package: devid-schema
+Architecture: all
+Depends: ${misc:Depends}
+Multi-Arch: foreign
+Suggests: slapd
+Description: LDAP schema file for devid device management schema
+ The devid schema allow the association between hardware devices
+ through its serial number and an existing LDAP user.
+ Using this schema, it is possible to restrict local hotplugable
+ devices such as USB devices only to those allowed for the locally
+ connected user.
 
 Package: libpam-devid
 Architecture: any
