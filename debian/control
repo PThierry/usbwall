@@ -28,8 +28,11 @@ Description: LDAP schema file for devid device management schema
 
 Package: libpam-usbwall
 Architecture: any
-Depends: ${shlibs:Depends}, ${misc:Depends}
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Depends: ${misc:Depends}, libpam0g
+Description: usbwall PAM support allowing user-based device filtering
+ This package permits to trigger user connections to filter locally
+ authorized devices depending on the locally authenticated users.
+ Any other hopluggable devices are forbidden.
+
 
 
