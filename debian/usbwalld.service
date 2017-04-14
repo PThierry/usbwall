@@ -1,0 +1,9 @@
+[Unit]
+Description=USBWall daemon
+Documentation=https://github.com/Oline/usbwall
+
+[Service]
+ExecStart=/usr/sbin/usbwalld -d
+
+[Install]
+WantedBy=multi-user.target

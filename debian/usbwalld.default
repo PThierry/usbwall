@@ -1,0 +1,7 @@
+# Defaults for USBWall daemon initscript
+# sourced by /etc/init.d/usbwalld
+# installed at /etc/default/usbwalld by the maintainer scripts
+
+# set to yes to start the daemon
+USBWALLD_START="no"
+# USBWALLD_START="yes"
