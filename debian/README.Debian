@@ -1,6 +1,18 @@
 usbwall for Debian
 -----------------
 
-<possible notes regarding this package - if none, delete this file>
+This project is an implementation of USB devices filtering based on
+the association between USB devices and user in a LDAP directory.
 
- -- pret <phil@reseau-libre.net>  Fri, 14 Apr 2017 09:56:19 +0200
+This permits one to restrict the usage of USB devices only to locally
+connected users, instead of all USB devices allowed in the infrastructure
+
+This project is separated in three part:
+- A daemon, managing the USB events and filtering
+- A PAM module, managing the user (dis)connections and interact with
+  the daemon depending on the list of locally connected users. The PAM
+  module retreives the list of allowed devices for the connected users
+  directly in the LDAP directory
+- A LDAP schema, needed to associate hardware devices to users.
+
+ -- Philippe Thierry <phil@reseau-libre.net>  Fri, 14 Apr 2017 09:56:19 +0200

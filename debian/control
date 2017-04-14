@@ -4,15 +4,16 @@ Priority: optional
 Maintainer: Sylvain Leroy <sylvain@unmondelibre.fr>
 Build-Depends: debhelper (>=9), libusb-1.0-0-dev, libldap2-dev, libpam0g-dev, cmake 
 Standards-Version: 3.9.8
-Homepage: http://github.com/Oline/usbwall
-Vcs-Git: git://github.com/Oline/usbwall.git
-Vcs-Browser: http://github.com/Oline/usbwall
+Homepage: https://github.com/Oline/usbwall
+Vcs-Git: https://github.com/Oline/usbwall.git
+Vcs-Browser: https://github.com/Oline/usbwall
 
 Package: usbwalld
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libusb-1.0-0, libpam0g
-Description: <insert up to 60 chars description>
- <insert long description, indented with spaces>
+Description: Device filtering daemon, managing locally authorized devices
+ This daemon interact with PAM and manage the locally authorized devices
+ list.
 
 Package: devid-schema
 Architecture: all
@@ -28,11 +29,9 @@ Description: LDAP schema file for devid device management schema
 
 Package: libpam-usbwall
 Architecture: any
-Depends: ${misc:Depends}, libpam0g
+Depends: ${shlibs:Depends}, ${misc:Depends}, libpam0g
 Description: usbwall PAM support allowing user-based device filtering
- This package permits to trigger user connections to filter locally
+ This package permits one to trigger user connections to filter locally
  authorized devices depending on the locally authenticated users.
  Any other hopluggable devices are forbidden.
-
-
 

@@ -1,0 +1,60 @@
+Description: Corrected spelling error in sources
+ Simple spelling error in syslog output.
+Author: Philippe Thierry
+Last-Update: 2017-04-14
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+
+--- a/src/daemon/devusb.c
++++ b/src/daemon/devusb.c
+@@ -293,7 +293,7 @@
+   /* start the wait_for_hotplug thread */
+   pthread_create(&g_hotplug_thread, NULL, wait_for_hotplug, NULL);
+ 
+-  syslog(LOG_DEBUG, "Devusb initialized sucessfully");
++  syslog(LOG_DEBUG, "Devusb initialized successfully");
+ 
+   return 0;
+ }
+--- a/src/daemon/devuser.c
++++ b/src/daemon/devuser.c
+@@ -66,7 +66,7 @@
+     return NULL;
+   }
+ 
+-  syslog(LOG_DEBUG, "Ldap initialization succeded");
++  syslog(LOG_DEBUG, "Ldap initialization succeeded");
+ 
+   return ldap_ptr;
+ }
+@@ -234,7 +234,7 @@
+ {
+   assert(devid && devids);
+ 
+-  syslog(LOG_DEBUG, "Devusb initialized sucessfully");
++  syslog(LOG_DEBUG, "Devusb initialized successfully");
+ 
+   int (*compare_function)(const void *, const void *) =
+     (int (*)(const void *, const void *))strcmp;
+--- a/src/daemon/usb_access.c
++++ b/src/daemon/usb_access.c
+@@ -81,7 +81,7 @@
+ 
+ void set_usb_default_access(int value)
+ {
+-  syslog(LOG_INFO, "Setting all devices default acccess to %d", value);
++  syslog(LOG_INFO, "Setting all devices default access to %d", value);
+ 
+   char file_path[1024] = { '\0' };
+   int idx = 1;
+--- a/src/pam/pam_usbwall.c
++++ b/src/pam/pam_usbwall.c
+@@ -49,7 +49,7 @@
+   if (fd == -1)
+   {
+     if (debug)
+-      syslog(LOG_ERR, "Unix socket can not be instanciated");
++      syslog(LOG_ERR, "Unix socket can not be instantiated");
+ 
+     return PAM_ABORT;
+   }
