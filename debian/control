@@ -1,7 +1,7 @@
 Source: usbwall
 Section: utils
 Priority: optional
-Maintainer: Sylvain Leroy <sylvain@unmondelibre.fr>
+Maintainer: Philippe Thierry <phil@reseau-libre.net>
 Build-Depends: debhelper (>=9), libusb-1.0-0-dev, libldap2-dev, libpam0g-dev, cmake 
 Standards-Version: 3.9.8
 Homepage: https://github.com/Oline/usbwall
