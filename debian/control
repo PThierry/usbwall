@@ -1,0 +1,29 @@
+Source: usbwall
+Section: utils
+Priority: optional
+Maintainer: Sylvain Leroy <sylvain@unmondelibre.fr>
+Build-Depends: debhelper (>=9), libusb-1.0-0-dev, libldap2-dev, libpam0g, cmake 
+Standards-Version: 3.9.8
+Homepage: http://github.com/Oline/usbwall
+Vcs-Git: git://github.com/Oline/usbwall.git
+Vcs-Browser: http://github.com/Oline/usbwall
+
+Package: usbwalld
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libusb-1.0-0
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: deviddctl
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+Package: libpam-devid
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+
+

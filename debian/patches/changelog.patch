@@ -1,0 +1,13 @@
+Description: Add upstream changelog from github
+ This file is generated from the ReleaseNotes posted on github,
+ associated to the current tag. This is the complete upstream
+ ChangeLog as posted by the upstream maintainer
+Author: Martin Preiser
+Origin: upstream, https://github.com/OpenSCAP/openscap-daemon/releases/tag/0.1.6
+Last-Update: 2017-04-11
+---
+This patch header follows DEP-3: http://dep.debian.net/deps/dep3/
+--- /dev/null
++++ b/changelog
+@@ -0,0 +1 @@
++# initial

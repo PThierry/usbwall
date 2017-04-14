@@ -1,0 +1,3 @@
+version=2
+opts=filenamemangle=s/.+\/v?(\d\S*)\.tar\.gz/v$1\.tar\.gz/ \
+  https://github.com/Oline/usbwall/tags .*/v?(\d\S*)\.tar\.gz
