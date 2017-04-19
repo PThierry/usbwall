@@ -5,8 +5,8 @@
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 export DEB_BUILD_HARDENING=1
 
-export DEB_TARGET_GNU_CPU = dpkg-architecture -qDEB_TARGET_GNU_CPU
-export DEB_TARGET_GNU_SYSTEM = dpkg-architecture -qDEB_TARGET_GNU_SYSTEM
+export DEB_TARGET_GNU_CPU = $(shell dpkg-architecture -qDEB_TARGET_GNU_CPU)
+export DEB_TARGET_GNU_SYSTEM = $(shell dpkg-architecture -qDEB_TARGET_GNU_SYSTEM)
 
 # there is an existing Makefile in upstream sources. Yet
 # the bootstrap script need to be executed first.
