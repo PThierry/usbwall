@@ -4,7 +4,7 @@ if [ true != "$INIT_D_SCRIPT_SOURCED" ] ; then
     set "$0" "$@"; INIT_D_SCRIPT_SOURCED=true . /lib/init/init-d-script
 fi
 ### BEGIN INIT INFO
-# Provides:          usbwalld
+# Provides:          usbwall-daemon
 # Required-Start:    $remote_fs $syslog
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
@@ -21,8 +21,8 @@ set -e
 
 # Author: Philippe Thierry <phil@reseau-libre.net>
 
-if test -f /etc/default/usbwalld; then
-    . /etc/default/usbwalld
+if test -f /etc/default/usbwall-daemon; then
+    . /etc/default/usbwall-daemon
 fi
 
 . /lib/lsb/init-functions
