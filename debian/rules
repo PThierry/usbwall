@@ -5,16 +5,17 @@
 export DEB_BUILD_MAINT_OPTIONS = hardening=+all
 export DEB_BUILD_HARDENING=1
 
-# see ENVIRONMENT in dpkg-buildflags(1)
-# package maintainers to append CFLAGS
-#export DEB_CFLAGS_MAINT_APPEND  = -Wall -pedantic
-# package maintainers to append LDFLAGS
-#export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+export DEB_TARGET_GNU_CPU = dpkg-architecture -qDEB_TARGET_GNU_CPU
+export DEB_TARGET_GNU_SYSTEM = dpkg-architecture -qDEB_TARGET_GNU_SYSTEM
 
 # there is an existing Makefile in upstream sources. Yet
 # the bootstrap script need to be executed first.
 override_dh_auto_configure:
 	./bootstrap
+
+override_dh_install:
+	dh_install
+	dh_install -plibpam_usbwall out/libpam_usbwall.so /lib/$(DEB_TARGET_GNU_CPU)-$(DEB_TARGET_GNU_SYSTEM)/security
 
 %:
 	dh $@ 
