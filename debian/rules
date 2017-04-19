@@ -15,7 +15,7 @@ override_dh_auto_configure:
 
 override_dh_install:
 	dh_install
-	dh_install -plibpam_usbwall out/libpam_usbwall.so /lib/$(DEB_TARGET_GNU_CPU)-$(DEB_TARGET_GNU_SYSTEM)/security
+	dh_install -plibpam-usbwall out/libpam_usbwall.so /lib/$(DEB_TARGET_GNU_CPU)-$(DEB_TARGET_GNU_SYSTEM)/security
 
 %:
 	dh $@ 
