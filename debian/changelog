@@ -1,8 +1,16 @@
+usbwall (0.5-1) unstable; urgency=medium
+
+  * Initial ITP release (Closes: #860315).
+  * Updated to upstream v0.5.
+  * Homogeneous binary packages name.
+  * Cleaner installation.
+
+ -- pret <pret@L319347>  Wed, 19 Apr 2017 16:19:31 +0200
+
 usbwall (0.4-1) unstable; urgency=medium
 
-  * Initial release (Closes: #860315).
-  * Add support for sysvinit and systemd integration for usbwalld
-  * Add man page for usbwalld
+  * Add support for sysvinit and systemd integration for usbwalld.
+  * Add man page for usbwalld.
   * Complete the installation process. Not yet clean.
 
  -- Philippe Thierry <phil@reseau-libre.net>  Fri, 14 Apr 2017 09:56:19 +0200

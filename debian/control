@@ -8,13 +8,21 @@ Homepage: https://github.com/Oline/usbwall
 Vcs-Git: https://github.com/Oline/usbwall.git
 Vcs-Browser: https://github.com/Oline/usbwall
 
-Package: usbwalld
+Package: usbwall-daemon
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, lsb-base, libusb-1.0-0, libpam0g
 Description: Device filtering daemon, managing locally authorized devices
  This daemon interact with PAM and manage the locally authorized devices
  list. Authorized devices list is then controlled through LDAP registration
  of devices and assignation to users.
+
+Package: usbwall-deviddctl
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Description to add with concertation with mainstream
+ This is a future CLI tool to manage usbwall echosystem.
+ This tool still need to be implemented. and is still under construction.
+ The goal of this tool yet need to be define here.
 
 Package: devid-schema
 Architecture: all
