@@ -5,7 +5,7 @@ usbwall (0.5-1) unstable; urgency=medium
   * Homogeneous binary packages name.
   * Cleaner installation.
 
- -- pret <pret@L319347>  Wed, 19 Apr 2017 16:19:31 +0200
+ -- Philippe Thierry <phil@reseau-libre.net>  Wed, 19 Apr 2017 16:19:31 +0200
 
 usbwall (0.4-1) unstable; urgency=medium
 
