@@ -72,16 +72,18 @@ static char *ports_to_string(uint8_t *ports, uint8_t ports_nb)
   return strcpy(ports_str, result);
 }
 
+__attribute__((pure))
 int device_is_valid(struct devusb *device)
 {
   assert(device);
 
+  /* Is a device without serial invalid?? */
   return device->ports_nb && device->bus && device->serial;
 }
 
 void set_usb_default_access(int value)
 {
-  syslog(LOG_INFO, "Setting all devices default acccess to %d", value);
+  syslog(LOG_INFO, "Setting all devices default access to %d", value);
 
   char file_path[1024] = { '\0' };
   int idx = 1;

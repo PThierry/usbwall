@@ -1,5 +1,3 @@
-#include "devuser.h"
-
 #include <assert.h>
 #include <fcntl.h>
 #include <ldap.h>
@@ -9,14 +7,34 @@
 #include <sys/stat.h>
 #include <syslog.h>
 #include <unistd.h>
-#include <utmp.h>
+#include <utmpx.h>
 
+#include "config.h"
 #include "ipc_pam.h"
+#include "format_validity.h"
+#include "devuser.h"
+
 
 /**
  * \brief maximum possible size of a user login
  */
-#define LOGIN_MAX_LEN 32
+# define LOGIN_MAX_LEN 32
+
+
+/**
+ * \brief maximum possible size of device id (devid)
+ */
+# define DEVID_MAX_LEN 1024
+
+
+
+/**
+ * \brief index of field horary in devusb->complete_id
+ */
+# define I_HORARY 7
+
+
+
 
 /**
  * \brief internal devuser function that start and configure a connection with
@@ -27,7 +45,7 @@
  *
  * \return the LDAP connection handler pointer. NULL if an error occured
  */
-static LDAP *setup_ldap(const struct ldap_cfg *cfg)
+static LDAP *setup_ldap(const struct config *cfg)
 {
   assert(cfg);
 
@@ -44,20 +62,20 @@ static LDAP *setup_ldap(const struct ldap_cfg *cfg)
       != LDAP_OPT_SUCCESS)
   {
     syslog(LOG_WARNING,
-           "Ldap does not support the protocol version %hd",
-           cfg->version);
+        "Ldap does not support the protocol version %hd",
+        cfg->version);
     ldap_unbind_ext(ldap_ptr, NULL, NULL);
 
     return NULL;
   }
 
   if (ldap_sasl_bind_s(ldap_ptr,
-                       cfg->binddn,
-                       NULL,
-                       &(struct berval){ strlen(cfg->bindpw), cfg->bindpw },
-                       NULL,
-                       NULL,
-                       NULL)
+        cfg->binddn,
+        NULL,
+        &(struct berval){ strlen(cfg->bindpw), cfg->bindpw },
+        NULL,
+        NULL,
+        NULL)
       != LDAP_SUCCESS)
   {
     syslog(LOG_WARNING, "Ldap sasl binding failed");
@@ -66,7 +84,7 @@ static LDAP *setup_ldap(const struct ldap_cfg *cfg)
     return NULL;
   }
 
-  syslog(LOG_DEBUG, "Ldap initialization succeded");
+  syslog(LOG_DEBUG, "Ldap initialization succeeded");
 
   return ldap_ptr;
 }
@@ -86,8 +104,8 @@ static LDAP *setup_ldap(const struct ldap_cfg *cfg)
  * (username). The returned values are bervals to be coherant with the LDAP API.
  */
 static struct berval **extract_devids(LDAP *ldap_ptr,
-                                      const char *username,
-                                      const struct ldap_cfg *cfg)
+    const char *username,
+    const struct config *cfg)
 {
   assert(ldap_ptr && username && cfg);
 
@@ -96,34 +114,34 @@ static struct berval **extract_devids(LDAP *ldap_ptr,
   snprintf(filter, LOGIN_MAX_LEN, "(uid=%s)", username);
 
   if (ldap_search_ext_s(ldap_ptr,
-                        cfg->basedn,
-                        LDAP_SCOPE_SUB,
-                        filter,
-                        NULL,
-                        /**
-                         * \todo
-                         * FIXME : a valid attribute list would
-                         * be better than NULL for the searching
-                         * function.
-                         */
-                        0,
-                        NULL, /* no timeout */
-                        NULL,
-                        NULL,
-                        12,
-                        /**
-                         * \remark
-                         *  searching for 1 entry should be valid,
-                         *  12 may be overkill...
-                         */
-                        &msg_ptr)
-      != LDAP_SUCCESS)
-    return NULL;
+        cfg->basedn,
+        LDAP_SCOPE_SUB,
+        filter,
+        NULL,
+        /**
+         * \todo
+         * FIXME : a valid attribute list would
+         * be better than NULL for the searching
+         * function.
+         */
+        0,
+        NULL, /* no timeout */
+        NULL,
+        NULL,
+        12,
+        /**
+         * \remark
+         *  searching for 1 entry should be valid,
+         *  12 may be overkill...
+         */
+        &msg_ptr)
+          != LDAP_SUCCESS)
+          return NULL;
   if (!ldap_count_entries(ldap_ptr, msg_ptr))
   {
     syslog(LOG_WARNING,
-           "Ldap research failed. No entry found for user %s",
-           username);
+        "Ldap research failed. No entry found for user %s",
+        username);
 
     return NULL;
   }
@@ -144,20 +162,24 @@ static struct berval **extract_devids(LDAP *ldap_ptr,
 
 struct linked_list *usernames_get(void)
 {
-  int utmp_fd = open("/var/run/utmp", O_RDONLY);
-  if (utmp_fd != -1)
+  int utmpx_fd = open("/var/run/utmp", O_RDONLY);
+
+  if (utmpx_fd != -1)
   {
     struct linked_list *usernames = list_make();
-    struct utmp log;
-    while (read(utmp_fd, &log, sizeof(struct utmp)) == sizeof(struct utmp))
-      if (log.ut_type == USER_PROCESS)
+    struct utmpx log;
+
+    while (read(utmpx_fd, &log, sizeof(struct utmpx)) == sizeof(struct utmpx))
       {
-        close(utmp_fd);
-        char *username = strdup(log.ut_name);
-        list_add_back(usernames, username);
-        syslog(LOG_DEBUG, "Fetched username : %s", username);
+	if (log.ut_type == USER_PROCESS)
+	  {
+	    close(utmpx_fd);
+	    char *username = strdup(log.ut_user);
+	    list_add_back(usernames, username);
+	    syslog(LOG_DEBUG, "Fetched username : %s", username);
+	  }
       }
-    close(utmp_fd);
+    close(utmpx_fd);
 
     if (!usernames->first)
       syslog(LOG_WARNING, "User not found!");
@@ -165,12 +187,12 @@ struct linked_list *usernames_get(void)
     return usernames;
   }
   syslog(LOG_WARNING,
-         "Current username can't be fetched! : utmp not available");
+      "Current username can't be fetched! : utmpx not available");
 
   return NULL;
 }
 
-struct linked_list *wait_for_logging()
+struct linked_list *wait_for_logging(void)
 {
   /* Wait for the event from PAM */
   enum event message_event = accept_user();
@@ -187,6 +209,7 @@ struct linked_list *wait_for_logging()
       break;
     case CLOSED:
       syslog(LOG_INFO, "Connection with PAM closed.");
+      error = 1;
       break;
     case ERROR:
       syslog(LOG_ERR, "Error from accept_user() function.");
@@ -201,10 +224,27 @@ struct linked_list *wait_for_logging()
   return error ? NULL : usernames_get();
 }
 
-struct linked_list *devids_get(const char *username,
-                               const struct ldap_cfg *cfg)
+int devids_check(void)
 {
-  assert(username && cfg);
+  const struct config *cfg = configuration_get();
+  LDAP *ldap_ptr = setup_ldap(cfg);
+  if (!ldap_ptr)
+  {
+    syslog(LOG_ERR, "Initial LDAP connection can't be established.");
+
+    return 1;
+  }
+
+  ldap_unbind_ext(ldap_ptr, NULL, NULL);
+  syslog(LOG_INFO, "LDAP connection verified");
+
+  return 0;
+}
+
+struct linked_list *devids_get(const char *username)
+{
+  assert(username);
+  const struct config *cfg = configuration_get();
 
   LDAP *ldap_ptr = setup_ldap(cfg); // init the connection
   if (!ldap_ptr)
@@ -230,14 +270,128 @@ struct linked_list *devids_get(const char *username,
   return devids;
 }
 
-int check_devid(const char *devid, struct linked_list *devids)
-{
+/*int check_devid(const char *devid, struct linked_list *devids)
+  {
   assert(devid && devids);
 
-  syslog(LOG_DEBUG, "Devusb initialized sucessfully");
+  syslog(LOG_DEBUG, "Checking %s devid ...", devid);
 
   int (*compare_function)(const void *, const void *) =
-    (int (*)(const void *, const void *))strcmp;
+  (int (*)(const void *, const void *))strcmp;
 
   return !!list_extract(devids, devid, compare_function);
+  }*/
+
+int32_t check_one_rule(char **not_parsed_rule, char **not_parsed_devid)
+{
+  char *field_rule;
+  char *field_devid;
+  char *begin;
+  char *end;
+  int32_t match = DEVIDD_ERR_OTHER;
+  int32_t i = 0;
+
+  /* FIXME: sizes are too big */
+  field_rule = calloc(1, DEVID_MAX_LEN);
+  field_devid = calloc(1, DEVID_MAX_LEN);
+
+  if (!field_rule || !field_devid)
+  {
+    free(field_rule);
+    free(field_devid);
+    return DEVIDD_ERR_MEM;
+  }
+
+  for (i = 0; (i < I_HORARY) && *not_parsed_rule; i++)
+  {
+    field_rule = strtok(*not_parsed_rule, ":");
+    field_devid = strtok(*not_parsed_devid, ":");
+
+
+    /* Offset = length of last token + separator ":" */
+    *not_parsed_rule += strlen(field_rule) + 1;
+    *not_parsed_devid += strlen(field_devid) + 1;
+
+    /* If rule's field is not equal to "*" nor to devid field,
+       we don't need to continue: the entire rule cannot match */
+    if (strcmp(field_rule, "*") && strcmp(field_rule, field_devid))
+      break;
+  }
+
+  if (i == I_HORARY)
+  {
+    begin = strtok(*not_parsed_rule, "-");
+    end = *not_parsed_rule + strlen(begin) + 1;
+    field_devid = strtok(*not_parsed_devid, ":");
+
+    if ((atoi(begin) <= atoi(field_devid))
+        && (atoi(field_devid) <= atoi(end)))
+    {
+      match = DEVIDD_SUCCESS;
+    }
+  }
+
+  free(field_rule);
+  free(field_devid);
+
+  return match;
+}
+
+int32_t check_devid(char *devid, struct linked_list *rules)
+{
+  /* int32_t i = 0; */
+  char *not_parsed_devid; /* Store tokens from devid that remain unparsed */
+  char *not_parsed_rule; /* Store tokens from rule that remain unparsed */
+  int32_t is_auth = DEVIDD_ERR_OTHER; /* Set to DEVIDD_SUCCESS if device is
+                                         authorized */
+  struct ll_node *rule = NULL; /* Rule point */
+
+  if (rules != NULL)
+    rule = rules->first;
+
+  /* FIXME needs to malloc string devid to give it to check_rule_format that destroy it with strtok */
+
+  /* Check if devid format is valid */
+  if (check_rule_format(devid) != DEVIDD_SUCCESS)
+  {
+    syslog(LOG_ERR, "Identifiant of device plugged is invalid");
+    return DEVIDD_ERR_OTHER;
+  }
+
+  /* Allocation of 2 strings which will store the tokens that remain
+     unparsed */
+  not_parsed_devid = malloc(strlen(devid));
+  not_parsed_rule = malloc(DEVID_MAX_LEN);
+
+  if (!not_parsed_devid || !not_parsed_rule)
+  {
+    free(not_parsed_devid);
+    free(not_parsed_rule);
+
+    return DEVIDD_ERR_MEM;
+  }
+
+  while (rule)
+  {
+    if (check_rule_format(rule->data) != DEVIDD_SUCCESS) /* FIXME Code was : check_rule_format(rule), but that didn't make any sense. This needs checking */
+    {
+      break;
+    }
+
+    not_parsed_rule = strdup(rule->data);
+    not_parsed_devid = strdup(devid);
+
+    is_auth = check_one_rule(&not_parsed_rule, &not_parsed_devid);
+
+    if (is_auth == DEVIDD_SUCCESS)
+      break;
+
+    rule = rule->next;
+  }
+
+  free(not_parsed_devid);
+  free(not_parsed_rule);
+
+  /* is_auth was set to DEVIDD_SUCCESS if one rule matched  */
+  return is_auth;
 }

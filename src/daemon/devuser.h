@@ -5,15 +5,16 @@
 
 #pragma once
 
-#include <misc/linked_list.h>
+#include <stdint.h>
 
-#include "ldap_config.h"
+#include <misc/linked_list.h>
+#include "misc/error_handler.h"
 
 /**
  * \brief Retrieve the current user name.
  * \return users names connected on the system. Return NULL on error.
  *
- * usernames is extracted from utmp.
+ * usernames is extracted from utmpx (Standard for accessing usernames on Unix systems).
  */
 struct linked_list *usernames_get(void);
 
@@ -28,10 +29,19 @@ struct linked_list *usernames_get(void);
 struct linked_list *wait_for_logging(void);
 
 /**
+ * \brief check if the ldap is accessible and usable. Be
+ * sure that the project configuration has been initialized
+ * before a call to this function.
+ *  Making devids accessible.
+ * \return 1 if an error occured, 0 otherwhise.
+ */
+int devids_check(void);
+
+/**
  * \brief Extract the list of usb serial ids allowed by
- *    the user.
+ *  the user. Be sure that the project configuration has
+ *  been initialized before a call to this function.
  * \param username name of the checked user
- * \param cfg current ldap configuration
  * \return Linked list containing serial ids as char *.
  *  NULL if an error occured.
  *
@@ -39,17 +49,30 @@ struct linked_list *wait_for_logging(void);
  * retrieved the devids from the given username. In the
  * case of a connection problem, NULL is returned.
  */
-struct linked_list *devids_get(const char *username,
-                               const struct ldap_cfg *cfg);
+struct linked_list *devids_get(const char *username);
+
+
 
 /**
- * \brief Take a devid and a list of devids and check if the given devid
- * is contained in devids. That said, it check if the devid is allowed
+ * \brief Take devid and a rule, and check if the devid match the given rule.
+ *
+ * \param not_parsed_rule the rule to parse
+ * \param not_parsed_devid the devid to parse and match with the given rule
+ *
+ * \return match which is set to DEVIDD_SUCCESS if devid matched the given
+ *  rule, DEVIDD_ERR otherwise
+ */
+int32_t check_one_rule(char **not_parsed_rule, char **not_parsed_devid);
+
+/**
+ * \brief Take a devid and a list of rules and check if the given devid
+ * match at least one rule. That said, it checks if the devid is allowed
  * for the current user.
  *
  * \param devid  the devid to be checked
- * \param devids  list of devids (char *) allowed for the current user
+ * \param rules  list of rules (char *) for the current user
  *
- * \return 1 if the device is allowed, 0 otherwhise
+ * \return is_auth, local variable set to DEVIDD_SUCCESS in case of
+ * device authorization
  */
-int check_devid(const char *devid, struct linked_list *devids);
+int32_t check_devid(char *devid, struct linked_list *rules);

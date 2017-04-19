@@ -11,7 +11,7 @@
 
 #include "devuser.h"
 #include "ipc_pam.h"
-#include "ldap_config.h"
+#include "config.h"
 #include "usb_access.h"
 
 /* Globals */
@@ -44,14 +44,17 @@ static int g_cfgupdate = 0;
 static struct linked_list *filter_devices(struct linked_list *allowed_devices,
                                           struct linked_list *devids)
 {
+  struct linked_list *corrupted_devices = NULL;
+  struct linked_list *forbidden_devices = NULL;
+
   assert(allowed_devices && devids);
 
-  struct linked_list *corrupted_devices = list_make();
-  if (!corrupted_devices)
+  corrupted_devices = list_make();
+  if (corrupted_devices == NULL)
     return NULL;
 
-  struct linked_list *forbidden_devices = list_make();
-  if (!forbidden_devices)
+  forbidden_devices = list_make();
+  if (forbidden_devices == NULL)
     return NULL;
 
   list_for_each(device_ptr, allowed_devices)
@@ -66,10 +69,11 @@ static struct linked_list *filter_devices(struct linked_list *allowed_devices,
       continue;
     }
 
-    if (!check_devid(device->serial, devids))
+    if (check_devid(device->complete_id, devids) != DEVIDD_SUCCESS)
     {
-      /* We can't find the serial in the devid list. The device is then not
-       * allowed. Just push it in the forbidden list and remove it from the
+      /* Device id doesn't match any rule from the firewall USB.
+       * The device is then not allowed.
+       * Just push it in the forbidden list and remove it from the
        * authorized ones. */
       list_add_back(forbidden_devices, device);
       list_remove(allowed_devices, device_ptr, 0);
@@ -82,17 +86,14 @@ static struct linked_list *filter_devices(struct linked_list *allowed_devices,
 
 /**
  * \brief core internal function to handle globals lookup.
- * \param cfg the configuration structure. Modified only if an update
  * notification is received
  * \return 1 if the program need to terminate, 0 else way.
  *
  * The function will lookup globals, usually setted by signal handler and
  * show that a change need to be made to the program state.
  */
-static int notifs_lookup(struct ldap_cfg **cfg)
+static int notifs_lookup(void)
 {
-  assert(cfg && *cfg);
-
   if (g_terminaison)
   {
     syslog(LOG_INFO, "Terminaison notif received, terminating program");
@@ -103,12 +104,11 @@ static int notifs_lookup(struct ldap_cfg **cfg)
   if (g_cfgupdate)
   {
     syslog(LOG_INFO, "Update notif received, updating config");
-    *cfg = make_ldap_cfg(cfg_file_find());
-    if (*cfg == NULL)
+    if (update_configuration(cfg_file_find()))
     {
       syslog(LOG_WARNING, "Configuration update failed, terminating program");
 
-      return 1; // no configs found
+      return 1; /* no configs found */
     }
     g_cfgupdate = 0;
   }
@@ -118,26 +118,29 @@ static int notifs_lookup(struct ldap_cfg **cfg)
 
 /**
  * \brief core internal function to handle a user connection
- * \param cfg the configuration structure, needed to use devuser functions
  * \param username the login of the connected user.
  *
  * The function will get plugged device list from devusb, it will get the list
  * of authorized devices from devuser, and update the access of devices in the
  * sysfs.
  */
-static void handle_login(struct ldap_cfg *cfg, const char *username)
+static void handle_login(const char *username)
 {
-  assert(cfg && username);
+  struct linked_list *device_list = NULL;
+  struct linked_list *devids = NULL;
+  struct linked_list *forbid = NULL;
 
-  struct linked_list *device_list = devices_get();
+  assert(username);
+
+  device_list = devices_get();
   if (!device_list)
     return;
 
-  struct linked_list *devids = devids_get(username, cfg);
+  devids = devids_get(username);
   if (!devids)
     return;
 
-  struct linked_list *forbid = filter_devices(device_list, devids);
+  forbid = filter_devices(device_list, devids);
   if (!forbid)
     return;
 
@@ -158,7 +161,7 @@ static void signal_handler(int signo)
   if (signo == SIGTERM)
   {
     syslog(LOG_INFO, "SIGTERM received");
-    close_ipc_pam(); // it will close all connections with pam
+    close_ipc_pam(); /* it will close all connections with pam */
     g_terminaison = 1;
   }
   else if (signo == SIGHUP)
@@ -168,37 +171,73 @@ static void signal_handler(int signo)
   }
 }
 
-int usbwall_run(void)
+/**
+ * \brief core internal function used to isolate the main loop.
+ * This function should be call only after every modules is initialized
+ * correctly. When this function return, the program should start its
+ * terminaison procedure
+ */
+static void core_loop(void)
 {
-  if (init_devusb())
-    return 1; // devusb initialization error
-
-  if (init_ipc_pam())
-    return 1; // Unix Domain Socket initialization error
-
-  struct ldap_cfg *cfg = make_ldap_cfg(cfg_file_find());
-  if (!cfg)
-    return 1; // no configs found
-
   struct linked_list *usernames = usernames_get();
-
   do
   {
-    if (notifs_lookup(&cfg))
-      break; // program terminaison requested
+    if (notifs_lookup())
+      break; /* program terminaison requested */
 
     if (!usernames)
       continue;
 
     list_for_each(node_ptr, usernames)
-      handle_login(cfg, node_ptr->data);
+      handle_login(node_ptr->data);
 
     list_destroy(usernames, 1);
   } while ((usernames = wait_for_logging()));
+}
 
+int usbwall_run(void)
+{
+  /* Initialization of the IPC_PAM module */
+  if (init_ipc_pam())
+    return 1;
+  /* *** */
+
+  /* Creation of the configuration structure */
+  if (update_configuration(cfg_file_find()))
+  {
+    destroy_ipc_pam();
+
+    return 1;
+  }
+  /* *** */
+
+  /* Initial check for the ldap server */
+  if (devids_check())
+  {
+    destroy_ipc_pam();
+    destroy_configuration();
+
+    return 1;
+  }
+  /* *** */
+
+  /* Initialization of the Devusb module */
+  if (init_devusb())
+  {
+    destroy_ipc_pam();
+    destroy_configuration();
+
+    return 1;
+  }
+  /* *** */
+
+  core_loop();
+
+  /* terminaison of modules */
   close_devusb();
-  destroy_ldap_cfg(cfg);
+  destroy_configuration();
   destroy_ipc_pam();
+  /* *** */
 
   return 0;
 }

@@ -12,9 +12,11 @@
  */
 static struct ll_node *node_make(void *data)
 {
+  struct ll_node *node = NULL;
+
   assert(data);
 
-  struct ll_node *node = malloc(sizeof(struct ll_node));
+  node = malloc(sizeof(struct ll_node));
   if (!node)
     return NULL;
 
@@ -81,10 +83,12 @@ void *list_extract(struct linked_list *ll,
                    const void *data,
                    int (* compare_function)(const void *, const void *))
 {
+  struct ll_node *ptr = NULL;
+
   assert(ll);
   assert(data && "Data can't be NULL.");
 
-  struct ll_node *ptr = ll->first;
+  ptr = ll->first;
   while (ptr && compare_function(ptr->data, data))
     ptr = ptr->next;
 
@@ -104,7 +108,7 @@ void list_remove(struct linked_list *ll,
   {
     ll->first = removed_node->next;
     if (ll->last == removed_node)
-      ll->last = NULL; // single node case
+      ll->last = NULL; /* single node case */
   }
   else
   {
@@ -113,7 +117,7 @@ void list_remove(struct linked_list *ll,
       ptr = ptr->next;
 
     if (!ptr)
-      return; // the node is not in the list
+      return; /* the node is not in the list */
 
     ptr->next = removed_node->next;
   }

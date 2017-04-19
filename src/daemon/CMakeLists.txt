@@ -4,10 +4,17 @@ set(DAEMON_SRC
   devusb.c
   devuser.c
   ipc_pam.c
-  ldap_config.c
+  config.c
   main.c
+  parser.c
   usb_access.c
+  complete_id.c
+  format_validity.c
+  server.c
   )
+
+include_directories(${USB1_INCLUDE_DIRS})
+include_directories(${LDAP_INCLUDE_DIRS})
 
 add_library(usbwalld_obj OBJECT ${DAEMON_SRC})
 

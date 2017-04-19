@@ -16,6 +16,8 @@ the authorized devices from LDAP.
 - libldap
 - libpam
 
+See INSTALL file for more information on dependencies installation.
+
 ## Build the project
 
 A bootstrap script has been made to help you build the project. You can simply
@@ -52,14 +54,15 @@ session optional pam_usbwall.so debug
 the host.
 - replace *pam_usbwall.so* by the name of the module you moved in the modules
 folder.
-- *debug* if an optional argument that specify if the debug mode is activated or
+- *debug* is an optional argument that specify if the debug mode is activated or
 not.
 
 ## Contributors
 
-Arthur d'Avray (arthur.davray@epita.fr)  
-Sylvain Leroy  (sylvain@unmondelibre.fr)  
-Damien Pradier (damien.pradier@epita.fr)
+Arthur d'Avray   (arthur.davray@epita.fr)  
+Mathilde Beylier (mathilde.beylier@epita.fr)  
+Sylvain Leroy    (sylvain@unmondelibre.fr)  
+Damien Pradier   (damien.pradier@epita.fr)
 
 This project was also inspired from the previous libpam-devid project made by
 Philippe Thierry (phil@reseau-libre.net).
